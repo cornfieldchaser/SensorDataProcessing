@@ -1,5 +1,6 @@
 import csv
 import pandas as pd
+import numpy as np
 import scipy.signal as signal
 from time_stamp_service import *
 from data_visualization import *
@@ -105,7 +106,42 @@ class Sensor:
         f1, t1, Zxx1 = signal.stft(data1, fs, nperseg=500)  # f为采样频率, t为时间, Zxx为data的stft
         f2, t2, Zxx2 = signal.stft(data2, fs, nperseg=500)
         f3, t3, Zxx3 = signal.stft(data3, fs, nperseg=500)
-        stft_plot(t1, f1, Zxx1)
+        data_1 = {
+            "f": f1,
+            "t": t1,
+            "Zxx": Zxx1
+        }
+        data_2 = {
+            "f": f2,
+            "t": t2,
+            "Zxx": Zxx2
+        }
+        data_3 = {
+            "f": f3,
+            "t": t3,
+            "Zxx": Zxx3
+        }
+        return data_1, data_2, data_3
+
+
+# 目的:高通滤波器，使得20Hz一下的弱噪声被消除
+# input:
+#   data1,data2,data3:三轴数据的时频图->dict{"f":f,"t":t,"Zxx":Zxx}->
+# output:
+#   data_1,data_2,data_3:高通滤波之后的三轴时频数据
+def high_pass_filter_20hz(datas):
+    for data in datas:
+        f = data['f']
+        t = data['t']
+        Zxx = data['Zxx']
+        # print(Zxx[0])
+        Zxx[0] = np.array([0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j,
+                  0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j], dtype=np.complex128)
+        Zxx[1] = np.array([0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j,
+                  0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j], dtype=np.complex128)
+        data['Zxx'] = Zxx
+    return datas
+
 
 
 # 目的:获取data1,data2,data3的斜率
